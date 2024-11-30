@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FilmDuckers - Halation Editor</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Left Panel: Image Preview -->
+    <div class="image-panel">
+      <div class="image-container" id="image-container">
+        <p>Drag & drop your image here or click to upload</p>
+        <input type="file" id="image-upload" accept="image/jpeg" hidden>
+      </div>
+    </div>
+
+    <!-- Right Panel: Controls -->
+    <div class="controls-panel">
+      <h2>Adjust Image Settings</h2>
+      
+      <div class="slider-group">
+        <label for="hue-slider">Hue</label>
+        <input type="range" id="hue-slider" min="0" max="360" value="0">
+        <span class="tooltip">Adjust the hue for halation</span>
+      </div>
+
+      <div class="slider-group">
+        <label for="blur-slider">Blur Amount</label>
+        <input type="range" id="blur-slider" min="0" max="20" value="5">
+        <span class="tooltip">Set the blur level for halation</span>
+      </div>
+
+      <div class="slider-group">
+        <label for="saturation-slider">Saturation</label>
+        <input type="range" id="saturation-slider" min="0" max="200" value="100">
+        <span class="tooltip">Adjust the image's saturation</span>
+      </div>
+
+      <div class="slider-group">
+        <label for="contrast-slider">Contrast</label>
+        <input type="range" id="contrast-slider" min="0" max="200" value="90">
+        <span class="tooltip">Adjust the image's contrast</span>
+      </div>
+
+      <button id="download-btn">Download Image</button>
+      <button id="reset-btn">Reset Filters</button>
+    </div>
+  </div>
+
+  <script>
+    // Trigger the file input when image container is clicked
+    document.getElementById('image-container').addEventListener('click', () => {
+      document.getElementById('image-upload').click();
+    });
+
+    // Handle image upload and preview
+    const imageUpload = document.getElementById('image-upload');
+    const imageContainer = document.getElementById('image-container');
+    let originalImage = null;
+
+    imageUpload.addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (!file || !file.type.startsWith('image/')) {
+        alert('Please upload a valid image file.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          originalImage = img;
+          drawPreview(img);
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Draw the image preview in the image container
+    function drawPreview(img) {
+      const previewCanvas = document.createElement('canvas');
+      const previewCtx = previewCanvas.getContext('2d');
+      previewCanvas.width = 300; // Smaller width for preview
+      previewCanvas.height = (300 / img.width) * img.height;
+      previewCtx.drawImage(img, 0, 0, previewCanvas.width, previewCanvas.height);
+
+      imageContainer.innerHTML = ''; // Clear the container
+      imageContainer.appendChild(previewCanvas);
+    }
+  </script>
+
+  <!-- Include the main JS file with the 'type="module"' attribute -->
+<script type="module" src="app.js"></script>
+
+<!-- Include the worker script with 'type="module"' attribute -->
+<script type="module" src="photonworker.js"></script>
+</body>
+</html>
